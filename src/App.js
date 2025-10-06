@@ -21,23 +21,21 @@ function App() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  // Load data from API
+  // Load data from frontend JSON/localStorage
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
     try {
-      const [eventsResponse, participantsResponse] = await Promise.all([
-        fetch('/data/events.json'),
-        fetch('/api/participants')
-      ]);
+      const storedEvents = localStorage.getItem('events');
+      const storedParticipants = localStorage.getItem('participants');
 
-      const eventsData = await eventsResponse.json();
-      const participantsData = await participantsResponse.json();
+      const eventsData = storedEvents ? JSON.parse(storedEvents) : await (await fetch('/data/events.json')).json();
+      const participantsData = storedParticipants ? JSON.parse(storedParticipants) : await (await fetch('/data/participants.json')).json();
 
-      setEvents(eventsData);
-      setParticipants(participantsData);
+      setEvents(eventsData || []);
+      setParticipants(participantsData || []);
       setLoading(false);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -47,30 +45,23 @@ function App() {
 
   const handleRegistration = async (participantData) => {
     try {
-      const response = await fetch('/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(participantData),
+      const newParticipant = {
+        id: Date.now().toString(),
+        ...participantData,
+        registrationDate: new Date().toISOString()
+      };
+      setParticipants(prev => {
+        const updated = [...prev, newParticipant];
+        localStorage.setItem('participants', JSON.stringify(updated));
+        return updated;
       });
-
-      if (response.ok) {
-        const newParticipant = await response.json();
-        setParticipants(prev => [...prev, newParticipant]);
-        
-        // Update event registration count
-        setEvents(prev => prev.map(event => 
-          event.id === participantData.eventId 
-            ? { ...event, registered: event.registered + 1 }
-            : event
-        ));
-        
-        setIsRegistrationModalOpen(false);
-        return { success: true, message: 'Registration successful!' };
-      } else {
-        throw new Error('Registration failed');
-      }
+      setEvents(prev => prev.map(event => 
+        event.id === participantData.eventId 
+          ? { ...event, registered: (event.registered || 0) + 1 }
+          : event
+      ));
+      setIsRegistrationModalOpen(false);
+      return { success: true, message: 'Registration successful!' };
     } catch (error) {
       console.error('Registration error:', error);
       return { success: false, message: 'Registration failed. Please try again.' };
@@ -79,22 +70,14 @@ function App() {
 
   const handleAddEvent = async (eventData) => {
     try {
-      const response = await fetch('/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(eventData),
+      const newEvent = { id: Date.now().toString(), ...eventData };
+      setEvents(prev => {
+        const updated = [...prev, newEvent];
+        localStorage.setItem('events', JSON.stringify(updated));
+        return updated;
       });
-
-      if (response.ok) {
-        const newEvent = await response.json();
-        setEvents(prev => [...prev, newEvent]);
-        setIsAddEventModalOpen(false);
-        return { success: true, message: 'Event added successfully!' };
-      } else {
-        throw new Error('Failed to add event');
-      }
+      setIsAddEventModalOpen(false);
+      return { success: true, message: 'Event added successfully!' };
     } catch (error) {
       console.error('Add event error:', error);
       return { success: false, message: 'Failed to add event. Please try again.' };
@@ -168,14 +151,14 @@ function App() {
         events={events}
         onDeleteParticipant={async (id) => {
           try {
-            const res = await fetch(`/api/participants/${id}`, { method: 'DELETE' });
-            if (!res.ok) throw new Error('Failed');
             // remove participant and update local event registered count
             let removedParticipant = null;
             setParticipants(prev => {
               const p = prev.find(pp => pp.id === id);
               removedParticipant = p || null;
-              return prev.filter(pp => pp.id !== id);
+              const updated = prev.filter(pp => pp.id !== id);
+              localStorage.setItem('participants', JSON.stringify(updated));
+              return updated;
             });
             if (removedParticipant) {
               setEvents(prev => prev.map(e => e.id === removedParticipant.eventId ? { ...e, registered: Math.max(0, (e.registered || 0) - 1) } : e));
@@ -198,14 +181,12 @@ function App() {
         event={selectedEvent}
         onUpdate={async (id, updates) => {
           try {
-            const res = await fetch(`/api/events/${id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(updates)
+            const updated = { ...selectedEvent, ...updates };
+            setEvents(prev => {
+              const next = prev.map(e => e.id === id ? updated : e);
+              localStorage.setItem('events', JSON.stringify(next));
+              return next;
             });
-            if (!res.ok) throw new Error('Failed');
-            const updated = await res.json();
-            setEvents(prev => prev.map(e => e.id === id ? updated : e));
             return { success: true, message: 'Event updated successfully!' };
           } catch (e) {
             return { success: false, message: 'Failed to update event' };
@@ -213,11 +194,16 @@ function App() {
         }}
         onDelete={async (id) => {
           try {
-            const res = await fetch(`/api/events/${id}`, { method: 'DELETE' });
-            if (!res.ok) throw new Error('Failed');
-            setEvents(prev => prev.filter(e => e.id !== id));
-            // Remove participants of this event locally
-            setParticipants(prev => prev.filter(p => p.eventId !== id));
+            setEvents(prev => {
+              const next = prev.filter(e => e.id !== id);
+              localStorage.setItem('events', JSON.stringify(next));
+              return next;
+            });
+            setParticipants(prev => {
+              const next = prev.filter(p => p.eventId !== id);
+              localStorage.setItem('participants', JSON.stringify(next));
+              return next;
+            });
             setIsDetailsModalOpen(false);
             return { success: true, message: 'Event deleted' };
           } catch (e) {
