@@ -1,0 +1,68 @@
+[
+  {
+    "id": "1",
+    "title": "AI & Machine Learning Workshop",
+    "description": "Learn the fundamentals of AI and ML with hands-on projects and real-world applications. Perfect for beginners and intermediate developers.",
+    "date": "2024-02-15T10:00:00",
+    "location": "SRM University AP - Tech Lab 1",
+    "capacity": 50,
+    "registered": 0,
+    "image": "🤖",
+    "category": "Workshop"
+  },
+  {
+    "id": "2",
+    "title": "Cloud Computing Bootcamp",
+    "description": "Master cloud technologies including AWS, Azure, and Google Cloud. Get certified and boost your career prospects.",
+    "date": "2024-02-20T14:00:00",
+    "location": "SRM University AP - Conference Hall",
+    "capacity": 75,
+    "registered": 0,
+    "image": "☁️",
+    "category": "Bootcamp"
+  },
+  {
+    "id": "3",
+    "title": "Hackathon 2024",
+    "description": "48-hour coding competition with exciting prizes. Build innovative solutions and network with industry professionals.",
+    "date": "2024-03-01T09:00:00",
+    "location": "SRM University AP - Innovation Center",
+    "capacity": 100,
+    "registered": 0,
+    "image": "💻",
+    "category": "Competition"
+  },
+  {
+    "id": "4",
+    "title": "Web Development Masterclass",
+    "description": "From HTML/CSS to React and Node.js. Build full-stack applications and deploy them to production.",
+    "date": "2024-02-25T11:00:00",
+    "location": "SRM University AP - Computer Lab 2",
+    "capacity": 40,
+    "registered": 0,
+    "image": "🌐",
+    "category": "Masterclass"
+  },
+  {
+    "id": "5",
+    "title": "Data Science & Analytics",
+    "description": "Explore data visualization, statistical analysis, and machine learning algorithms for business intelligence.",
+    "date": "2024-03-05T15:00:00",
+    "location": "SRM University AP - Data Lab",
+    "capacity": 60,
+    "registered": 0,
+    "image": "📊",
+    "category": "Workshop"
+  },
+  {
+    "id": "6",
+    "title": "Cybersecurity Workshop",
+    "description": "Learn ethical hacking, network security, and digital forensics. Protect systems from cyber threats.",
+    "date": "2024-03-10T13:00:00",
+    "location": "SRM University AP - Security Lab",
+    "capacity": 35,
+    "registered": 0,
+    "image": "🔒",
+    "category": "Workshop"
+  }
+]
