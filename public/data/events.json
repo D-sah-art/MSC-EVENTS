@@ -64,16 +64,5 @@
     "registered": 0,
     "image": "🔒",
     "category": "Workshop"
-  },
-  {
-    "id": "1759747795275",
-    "title": "HACK MSC",
-    "description": "Microsoft Hackaton",
-    "date": "2025-10-31T23:00",
-    "location": "SRM University AP",
-    "capacity": 100,
-    "category": "Hackathon",
-    "registered": 0,
-    "image": "💻"
   }
 ]

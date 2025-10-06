@@ -29,13 +29,13 @@ function App() {
   const loadData = async () => {
     try {
       const [eventsResponse, participantsResponse] = await Promise.all([
-        fetch('/api/events'),
+        fetch('/data/events.json'),
         fetch('/api/participants')
       ]);
-      
+
       const eventsData = await eventsResponse.json();
       const participantsData = await participantsResponse.json();
-      
+
       setEvents(eventsData);
       setParticipants(participantsData);
       setLoading(false);
@@ -170,11 +170,16 @@ function App() {
           try {
             const res = await fetch(`/api/participants/${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error('Failed');
-            setParticipants(prev => prev.filter(p => p.id !== id));
-            // Reload events to update registered counts
-            const evRes = await fetch('/api/events');
-            const ev = await evRes.json();
-            setEvents(ev);
+            // remove participant and update local event registered count
+            let removedParticipant = null;
+            setParticipants(prev => {
+              const p = prev.find(pp => pp.id === id);
+              removedParticipant = p || null;
+              return prev.filter(pp => pp.id !== id);
+            });
+            if (removedParticipant) {
+              setEvents(prev => prev.map(e => e.id === removedParticipant.eventId ? { ...e, registered: Math.max(0, (e.registered || 0) - 1) } : e));
+            }
           } catch (e) {
             console.error(e);
           }
